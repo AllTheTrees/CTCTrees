@@ -9,7 +9,7 @@ Tree finding is just brute force - check every pixel in the world map for trees.
 
 We find pixel-perfect matches in the world map using the sample tree images in the /trees directory. If a certain percentage of the pixels in a small window matches those of a sample tree, then we have found a tree in the world map. Unfortunately, when pixels are blocked, or when trees overlap one another, we both hallucinate trees and fail to detect some trees. Hopefully this is not too big of an issue.
 
-Notably, we exclude yew trees, some desert trees(?), cacti, swamp plants, other plants, and those plant things(?) in Tirannwn.
+Notably, we exclude yew trees, some desert trees(?), cacti, swamp plants, other plants, and those plant(?) things in Tirannwn.
 
 The full list of trees found on the world map using this program is uploaded [here](http://pastebin.com/GKSamjU9). The three integers per line are x position, y position, and tree type (match the number with the image in the /trees directory).
 
