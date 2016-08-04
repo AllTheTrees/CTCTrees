@@ -12,17 +12,23 @@ We find pixel-perfect matches in the world map using the sample tree images in t
 Notably, we exclude yew trees, some desert trees(?), cacti, swamp plants, other plants, and those plant things(?) in Tirannwn.
 
 The full list of trees found on the world map using this program is uploaded [here](http://pastebin.com/GKSamjU9). The three integers per line are x position, y position, and tree type (match the number with the image in the /trees directory).
- 
+
 ### Matching groups of trees to the stacked clues
 
+This part of the project is experimental. The layout of trees from stacked clues (from [/u/Ninjamark1991's post](https://www.reddit.com/r/CrackTheClue/comments/4vynzy/using_trees_as_a_clue/) on Reddit) is matched to trees in the world map.
 
+This is done efficiently by noticing that [these trees](http://i.imgur.com/JBTG048.png) are vertically aligned. We can sort the list of trees that we have found by x position, then y position. Now, the tree following tree X in the sorted list will be the one that is immediately below X. From there, we can calculate where the other 17 trees ought to be on the world map, and check whether or not they are there by fuzzy binary search.
 
-Does it work?
+## Does it work?
 
-Seems like it:
+Seems like it does:
 ![close match](http://i.imgur.com/ahxxWCr.png)
 
-But the algorithm only checks trees if there is 
+This is a close match, but seems unlikely to be a lead. Other results are just as unlikely to be leads. Most of the matches are clumps of trees, or hallucinated trees. Most importantly, the algorithm might miss certain clusters due to intrinsic limitations of the algorithm, as a result of constraining two of the trees to be vertically aligned.
+
+This is where you come in. Go wild with the tree data!
+
+## Some results
 
 Match with 1 pixel error threshold (per tree):
 ![tree match with fuzz=2](http://i.imgur.com/6AXAxHI.png)
@@ -33,5 +39,5 @@ Match with 1 pixel error threshold (per tree):
 3 pixel error threshold:
 ![tree match with fuzz=2](http://i.imgur.com/OkKfNy5.png)
 
-5 pixel error threshold:
+5 pixel error threshold (for fun):
 ![tree match with fuzz=2](http://i.imgur.com/ovxFEBj.png)
