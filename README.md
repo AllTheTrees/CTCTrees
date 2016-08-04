@@ -15,7 +15,7 @@ The full list of trees found on the world map using this program is uploaded [he
 
 ### Matching groups of trees to the stacked clues
 
-This part of the project is experimental. The layout of trees from stacked clues (from [/u/Ninjamark1991's post](https://www.reddit.com/r/CrackTheClue/comments/4vynzy/using_trees_as_a_clue/) on Reddit) is matched to trees in the world map.
+This part of the project is experimental. The layout of trees from stacked clues (from [/u/Ninjamark1991's post](https://www.reddit.com/r/CrackTheClue/comments/4vynzy/using_trees_as_a_clue/) on Reddit) is matched to trees in the world map. We sample the locations of those trees by marking each tree with a red (255,0,0) dot at the bottom (data/clue1.png) or at the top (data/clue2.png).
 
 This is done efficiently by noticing that [these trees](http://i.imgur.com/JBTG048.png) are vertically aligned. We can sort the list of trees that we have found by x position, then y position. Now, the tree following tree T in the sorted list will be the one that is immediately below tree T. Assuming we interpret the circled trees in the image as those two trees, we can calculate where the other 17 trees ought to be on the world map, and check whether or not they are there by fuzzy binary search. Error tolerances (called "fuzz" in the code) of 1 - 5 pixels per tree are used (see results below).
 
@@ -24,7 +24,7 @@ This is done efficiently by noticing that [these trees](http://i.imgur.com/JBTG0
 Seems like it does:
 ![close match](http://i.imgur.com/ahxxWCr.png)
 
-This is a close match (made with an error tolerance of 1 pixel), and it's the only almost-perfect match found on the entire world map, but it seems unlikely to be a lead. Other results are just as unlikely to be leads. Most of the matches are clumps of trees, or hallucinated trees. Most importantly, the algorithm might miss certain clusters due to intrinsic limitations of the algorithm, as a result of constraining two of the trees to be vertically aligned.
+This is a close match (made with an error tolerance of 1 pixel), and it's the only almost-perfect match found on the entire world map, but it seems unlikely to be a lead. Other results are just as unlikely to be leads. Most of the matches are clumps of trees, or hallucinated trees. Most importantly, the algorithm might miss certain clusters due to intrinsic limitations of the algorithm, as a result of constraining two of the trees to be vertically aligned. For instance, the algorithm might miss tree groups in which those two trees are not vertically aligned, or where the trees are all rotated.
 
 This is where you come in. Go wild with the [tree data](http://pastebin.com/GKSamjU9)!
 
