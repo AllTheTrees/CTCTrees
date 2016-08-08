@@ -30,7 +30,7 @@ Matching this tree pattern is done by picking the closest pair of trees in the t
 
 ### Filtering out false positives
 
-This is a very important step, and logically it occurs simultaneously with step 2. We assume that the tree pattern is drawn such that there are no other trees in the vicinity (otherwise, they would have been included in the pattern). This lets us weed out ~95% of the false positives, making the output map much much cleaner. Specifically, we check if there exist trees between our matched trees. If there is even one tree in between our matched trees, then we treat the match as a false positive. Other filtering steps include verifying a low error in the relative span of the match and that of the pattern, and sorting the matches by normalized squared error.
+This is a very important step, and logically it occurs simultaneously with step 2. We assume that the tree pattern is drawn such that there are no other trees in the vicinity (otherwise, they would have been included in the pattern). This lets us weed out ~95% of the false positives, making the output map much much cleaner. Specifically, we check if there exist trees between our matched trees. If there is even one tree in between pairs in our matched trees, then we treat the match as a false positive. Other filtering steps include verifying a low error in the relative span of the match and that of the pattern, and sorting the matches by normalized squared error.
 
 ### Parameters
 
