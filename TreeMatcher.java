@@ -140,7 +140,7 @@ public class TreeMatcher {
     private static boolean checkTreesInVicinity(ArrayList<Tree> matchingTrees, TreeGrid treeGrid) {
         HashSet<Tree> matchingTreesSet = new HashSet<Tree>(matchingTrees);
 
-        int numTreesInBetween = 0, threshold = (int)(matchingTrees.size() * 0.9);
+        int numTreesInBetween = 0, threshold = (int)(matchingTrees.size() * 0.1);
 
         // Find trees at affine combinations of matching trees
         for (int i = 0; i < matchingTrees.size(); i++) {
@@ -154,7 +154,7 @@ public class TreeMatcher {
                             k / (double)numberOfPointsToCheck, 2 + 1e-10);
 
                     if (treeInBetween != null && !matchingTreesSet.contains(treeInBetween)) {
-                        if (numTreesInBetween++ > threshold) {
+                        if (numTreesInBetween++ >= threshold) {
                             return false;
                         }
                     }
