@@ -1,43 +1,43 @@
 # CTCTrees
 Matching trees for Crack The Clue
 
+One provides a tree pattern image as input, and the program spits out a world map with the top matched tree groups circled, ranging from green (relative high match) to blue (relative low match). A similar version of the code is running live on the /r/CrackTheClue subreddit, where a bot responds to `!TreeSearch [imgur url]` commands.
+
 ## How does it work?
 
-### Recognizing trees
+There are 3 steps, and 3 important parameters to tune.
 
-Tree finding is just brute force - check every pixel in the world map for trees. This takes some time to do (20 minutes - 1 hour on a Macbook Air).
+### 1. Recognizing trees on the world map
 
-We find pixel-perfect matches in the world map using the sample tree images in the /trees directory. If a certain percentage of the pixels in a small window matches those of a sample tree, then we have found a tree in the world map. Unfortunately, when pixels are blocked, or when trees overlap one another, we both hallucinate trees and fail to detect some trees. Hopefully this is not too big of an issue.
+Tree finding is just brute force - check every pixel in the world map for trees. This takes some time to do (20 - 30 minutes on a Macbook Air). This only needs to be done once, though. Trees that are found will be saved to the savefile `data/trees.txt`. This repo comes with a savefile, so you can skip most of the processing.
 
-Notably, we exclude yew trees, some desert trees(?), cacti, swamp plants, other plants, and those plant(?) things in Tirannwn.
+We find pixel-perfect matches in the world map using the sample tree images in the /trees directory. If a certain percentage (80%, don't ask why) of the pixels in a small window matches those of a sample tree, then we have found a tree in the world map. Unfortunately, when pixels are blocked, or when trees overlap one another, we both hallucinate trees and fail to detect some trees. Hopefully this is not too big of an issue for now. However, I believe that missing even a few trees in our tree list is highly detrimental to the success rate of our tree matcher.
+
+Notably, we exclude rare tree icons, some desert trees(?), cacti, swamp plants, other plants, and those plant(?) things in Tirannwn.
 
 The full list of trees found on the world map using this program is uploaded [here](http://pastebin.com/GKSamjU9). The three integers per line are x position, y position, and tree type (match the number with the image in the /trees directory).
 
-### Matching groups of trees to the stacked clues
+### 2. Matching groups of trees to the stacked clues
 
-This part of the project is experimental. The layout of trees from stacked clues (from [/u/Ninjamark1991's post](https://www.reddit.com/r/CrackTheClue/comments/4vynzy/using_trees_as_a_clue/) on Reddit) is matched to trees in the world map. We sample the locations of those trees by marking each tree with a single red (255,0,0) pixel at the bottom (data/clue1.png) or at the top (data/clue2.png). This lets the program know where each tree is. We refer to this image as a "tree pattern" image.
+The algorithm for matching trees has changed vastly since the first iteration of the program.
 
-Matching this tree pattern is done efficiently by noticing that [these trees](http://i.imgur.com/JBTG048.png) are vertically aligned. We can sort the list of trees that we have found by x position, then y position. Now, the tree following tree T in the sorted list will be the one that is immediately below tree T on the map. Assuming we interpret the circled trees in the image as those two trees, we can calculate where the other 17 trees ought to be on the world map, and check whether or not they are there by fuzzy binary search. Error tolerances (called "fuzz" in the code) of 1 - 5 pixels per tree are used (see results below).
+The layout of trees from stacked clues (from [/u/Ninjamark1991's post](https://www.reddit.com/r/CrackTheClue/comments/4vynzy/using_trees_as_a_clue/) on Reddit) is matched to trees in the world map. We sample the locations of those trees by marking each tree with a single red (255,0,0) pixel at the bottom (data/clue1.png) or at the top (data/clue2.png). This lets the program know where each tree is. We refer to this image as a "tree pattern" image.
 
-## Does it work?
+Matching this tree pattern is done by picking the closest pair of trees in the tree pattern as our "key" or "anchor" trees, A and B. We then rotate the tree pattern, as well as the entire world map, by an angle theta such that A ends up being directly above B after rotating. Now examining the trees in the world map, iterating through each A candidate, we pick another B candidate that is directly below the A candidate after rotating. Using the positions of the A and B candidates, we can determine where the other trees in the pattern ought be on the world map (if the pattern is accurate). To account for inaccuracies in the pattern, we use an error tolerance per tree. There is ample room for improvement in dealing with pattern inaccuracies.
 
-Seems like it does:
-![close match](http://i.imgur.com/ahxxWCr.png)
+To find the tree closest to each pixel relatively quickly, we use a grid-based method. After matching each tree
 
-This is a close match (made with an error tolerance of 1 pixel), and it's the only almost-perfect match found on the entire world map, but it seems unlikely to be a lead. Other results are just as unlikely to be leads. Most of the matches are clumps of trees, or hallucinated trees. Most importantly, the algorithm might miss certain clusters due to intrinsic limitations of the algorithm, as a result of constraining two of the trees to be vertically aligned. For instance, the algorithm might miss tree groups in which those two trees are not vertically aligned, or where the trees are all rotated.
+### Filtering out false positives
 
-This is where you come in. Go wild with the [tree data](http://pastebin.com/GKSamjU9)!
+This is a very important step, and logically it occurs simultaneously with step 2. We assume that the tree pattern is drawn such that there are no other trees in the vicinity (otherwise, they would have been included in the pattern). This lets us weed out ~90% of the false positives, making the output map much cleaner. Specifically, we check if there exist trees between our matched trees. If there is even one tree in between our matched trees, then the match is a false positive. Other filtering steps include verifying a low error in the relative span of the match and that of the pattern, and sorting the matches by normalized squared error.
 
-## Some results
+Here is an example run of no particular merit:
+![An example run](http://i.imgur.com/v9CSgg7.png)
 
-Match with 1 pixel error tolerance (per tree):
-![tree match with fuzz=2](http://i.imgur.com/6AXAxHI.png)
+### Parameters
 
-2 pixel error tolerance:
-![tree match with fuzz=2](http://i.imgur.com/KMH9LKC.png)
+*Top K matches* - the default is *50* - Pretty self-explanatory: the maximum number of (top) results to show.
 
-3 pixel error tolerance:
-![tree match with fuzz=2](http://i.imgur.com/OkKfNy5.png)
+*Pixel tolerance* - the default is *8* - The maximum distance in pixels between expected tree positions and actual tree positions, per tree. Increasing this value gives more and more incomprehensible results. Decreasing this value seeks only close to perfect matches.
 
-5 pixel error tolerance (for fun):
-![tree match with fuzz=2](http://i.imgur.com/ovxFEBj.png)
+*Tile size* - the default has little meaning to non-contributors - The lower this is, the faster the grid-based search runs. However, with high pixel tolerance, you need a large tile size.
